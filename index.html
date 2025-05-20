@@ -6,15 +6,14 @@
   <title>ShadowFind</title>
   <link rel="stylesheet" href="assets/style.css" />
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-5ZT8TJ8P9C"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-5ZT8TJ8P9C');
-</script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5ZT8TJ8P9C"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-5ZT8TJ8P9C');
+  </script>
 </head>
 
 <body>
@@ -32,19 +31,38 @@
       const container = document.getElementById('results');
       container.innerHTML = "";
 
-      if (typeof SEARCH_RESULTS !== 'undefined' && SEARCH_RESULTS.hasOwnProperty(query)) {
-        const div = document.createElement('div');
-        div.className = "result";
-        div.innerText = SEARCH_RESULTS[query];
-        div.onclick = () => {
-          gtag('event', 'clic_lien_darkweb', {
-            'event_category': 'DarkWebSearch',
-            'event_label': query
-          });
-          window.location.href = "warning.html";
-        };
-        container.appendChild(div);
-      } else {
+      if (!query) {
+        container.innerText = "Veuillez entrer un terme de recherche.";
+        return;
+      }
+
+      const queryWords = query.split(/\s+/);
+      let foundAny = false;
+
+      for (const key in SEARCH_RESULTS) {
+        if (SEARCH_RESULTS.hasOwnProperty(key)) {
+          // On regarde si au moins un mot de la recherche est dans la clé
+          const keyLower = key.toLowerCase();
+          const match = queryWords.some(word => keyLower.includes(word));
+
+          if (match) {
+            foundAny = true;
+            const div = document.createElement('div');
+            div.className = "result";
+            div.innerText = SEARCH_RESULTS[key];
+            div.onclick = () => {
+              gtag('event', 'clic_lien_darkweb', {
+                'event_category': 'DarkWebSearch',
+                'event_label': key
+              });
+              window.location.href = "warning.html";
+            };
+            container.appendChild(div);
+          }
+        }
+      }
+
+      if (!foundAny) {
         const div = document.createElement('div');
         div.className = "result";
         div.innerText = "Aucun résultat trouvé sur le darknet pour cette recherche.";
